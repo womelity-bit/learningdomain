@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learning Domains Explorer</title>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin
+        src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fadeIn {
+            animation: fadeIn 0.5s ease-out;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        function LearningDomainsApp() {
+            const [selectedDomain, setSelectedDomain] = useState(null);
+            const [expandedLevel, setExpandedLevel] = useState(null);
+            const [showQuiz, setShowQuiz] = useState(false);
+            const [currentQuestion, setCurrentQuestion] = useState(0);
+            const [selectedAnswers, setSelectedAnswers] = useState({});
+            const [showResults, setShowResults] = useState(false);
+            const [quizCompleted, setQuizCompleted] = useState(false);
+            const [showVideoModal, setShowVideoModal] = useState(false);
+            const [showQuizModal, setShowQuizModal] = useState(false);
+            const [quizAnswers, setQuizAnswers] = useState({});
+            const [showCorrectAnswers, setShowCorrectAnswers] = useState(false);
+            const [remainingQuestions, setRemainingQuestions] = useState([0,1,2]); 
+            const [allCorrect, setAllCorrect] = useState(false);
+            const [forceRerender, setForceRerender] = useState(false);
+
+
+
+
+            // React.useEffect(() => {
+            //     if (selectedDomain) {
+            //         // Open modal automatically when a domain is opened
+            //         setShowModal(true);
+            //     }
+            // }, [selectedDomain]);
+            
+
+            React.useEffect(() => {
+                if (selectedDomain) {
+                    setShowVideoModal(true);
+
+                    // Automatically show quiz after video duration
+                    const videoTime =  (domains[selectedDomain]?.videoDuration || 60) * 1000;
+                    const timer = setTimeout(() => {
+                        setShowVideoModal(false);
+                        setShowQuizModal(true);
+                    }, videoTime);
+
+                    return () => clearTimeout(timer);
+                }
+            }, [selectedDomain]);
+
+            const domains = {
+                cognitive: {
+                    title: "Cognitive Domain",
+                    link: "https://drive.google.com/file/d/1tGBMHnO5AjHRVr9mrixJiqoaUjfKHcAz/preview", //https://drive.google.com/file/d/1tGBMHnO5AjHRVr9mrixJiqoaUjfKHcAz/view?usp=sharing
+                    videoDuration: "",
+                    subtitle: "Knowledge & Intellectual Skills",
+                    color: "bg-gradient-to-br from-blue-500 to-indigo-600",
+                    lightColor: "bg-gradient-to-br from-blue-50 to-indigo-50",
+                    borderColor: "border-blue-500",
+                    accentColor: "text-blue-600",
+                    description: "The cognitive domain involves knowledge and the development of intellectual skills.",
+                    developer: "Developed by Benjamin Bloom in 1956 (revised by Anderson & Krathwohl in 2001)",
+                    emoji: "🧠",
+                    levels: [
+                        {
+                            name: "Remember",
+                            description: "Retrieve relevant knowledge from long-term memory",
+                            examples: ["Define key terms", "List important facts", "Recall information"],
+                            verbs: "Define, List, State, Name, Recall, Recognize",
+                            icon: "💭"
+                        },
+                        {
+                            name: "Understand",
+                            description: "Construct meaning from instructional messages",
+                            examples: ["Explain concepts", "Summarize passages", "Classify items"],
+                            verbs: "Explain, Describe, Summarize, Paraphrase, Classify",
+                            icon: "💡"
+                        },
+                        {
+                            name: "Apply",
+                            description: "Use procedures to solve problems",
+                            examples: ["Use formulas to solve problems", "Apply theories", "Demonstrate techniques"],
+                            verbs: "Apply, Demonstrate, Calculate, Solve, Use",
+                            icon: "⚙"
+                        },
+                        {
+                            name: "Analyze",
+                            description: "Break material into parts",
+                            examples: ["Identify patterns", "Distinguish facts and opinions", "Examine components"],
+                            verbs: "Analyze, Compare, Contrast, Differentiate, Examine",
+                            icon: "🔍"
+                        },
+                        {
+                            name: "Evaluate",
+                            description: "Make judgments based on criteria",
+                            examples: ["Critique arguments", "Justify decisions", "Assess validity"],
+                            verbs: "Evaluate, Critique, Judge, Justify, Assess",
+                            icon: "⚖"
+                        },
+                        {
+                            name: "Create",
+                            description: "Put elements together to form a whole",
+                            examples: ["Design new solutions", "Compose original works", "Develop plans"],
+                            verbs: "Create, Design, Develop, Formulate, Construct",
+                            icon: "✨"
+                        }
+                    ],
+                    videoQuiz: [
+                        {
+                            question: "What does the cognitive domain deal with?",
+                            options: ["Feelings", "Physical skills", "Thinking and learning", "Teamwork"],
+                            correct: 2,
+                            explanation: "The cognitive domain is about mental skills, thinking, and learning."
+                        },
+                        {
+                            question: "Remembering facts is part of which level?",
+                            options: ["Understanding", "Remembering", "Applying", "Creating"],
+                            correct: 1,
+                            explanation: "Remembering is the first level of the cognitive domain."
+                        },
+                        {
+                            question: "When a student tells a story in their own words, that shows—",
+                            options: ["Understanding", "Creating", "Remembering", "Evaluating"],
+                            correct: 0,
+                            explanation: "Explaining something in your own words shows understanding."
+                        },
+                        {
+                            question: "Solving a math problem using a formula is which level?",
+                            options: ["Applying", "Analyzing", "Remembering", "Evaluating"],
+                            correct: 0,
+                            explanation: "Using what you know in real situations is the Applying level."
+                        },
+                        {
+                            question: "Making something new from what you’ve learned is called—",
+                            options: ["Understanding", "Analyzing", "Evaluating", "Creating"],
+                            correct: 3,
+                            explanation: "Creating means forming something new from existing knowledge."
+                        }
+                    ],
+                    quiz: [
+                        {
+                            question: "Which level involves recalling facts and basic concepts?",
+                            options: ["Understand", "Remember", "Apply", "Analyze"],
+                            correct: 1,
+                            explanation: "Remember is the foundational level where learners retrieve knowledge from memory."
+                        },
+                        {
+                            question: "What action verb represents the Apply level?",
+                            options: ["Define", "Demonstrate", "Compare", "Evaluate"],
+                            correct: 1,
+                            explanation: "Demonstrate is an action verb for the Apply level."
+                        },
+                        {
+                            question: "Creating new solutions falls under which level?",
+                            options: ["Analyze", "Evaluate", "Create", "Understand"],
+                            correct: 2,
+                            explanation: "Create is the highest level where learners form something new."
+                        },
+                        {
+                            question: "Which level involves making judgments?",
+                            options: ["Evaluate", "Analyze", "Apply", "Understand"],
+                            correct: 0,
+                            explanation: "Evaluate involves making judgments based on criteria."
+                        },
+                        {
+                            question: "Breaking material into parts is called:",
+                            options: ["Synthesis", "Application", "Analysis", "Comprehension"],
+                            correct: 2,
+                            explanation: "Analysis involves breaking down material into parts."
+                        }
+                    ]
+                },
+                affective: {
+                    title: "Affective Domain",
+                    link: "https://drive.google.com/file/d/1zcVWyQkRQY5BeAcIiLblR0ywbNhD1S3W/preview",//"https://drive.google.com/file/d/1zcVWyQkRQY5BeAcIiLblR0ywbNhD1S3W/view?usp=sharing",
+                    videoDuration: "",
+                    subtitle: "Emotions, Attitudes & Values",
+                    color: "bg-gradient-to-br from-rose-500 to-pink-600",
+                    lightColor: "bg-gradient-to-br from-rose-50 to-pink-50",
+                    borderColor: "border-rose-500",
+                    accentColor: "text-rose-600",
+                    description: "The affective domain involves our feelings, emotions, attitudes, and values.",
+                    developer: "Developed by David Krathwohl, Benjamin Bloom, and Bertram Masia in 1964",
+                    emoji: "❤",
+                    levels: [
+                        {
+                            name: "Receiving",
+                            description: "Awareness and willingness to listen",
+                            examples: ["Listen respectfully", "Show awareness", "Attend to instructions"],
+                            verbs: "Listen, Acknowledge, Attend, Perceive",
+                            icon: "👂"
+                        },
+                        {
+                            name: "Responding",
+                            description: "Active participation and reaction",
+                            examples: ["Participate in discussions", "Complete assignments", "Follow guidelines"],
+                            verbs: "Respond, Participate, Comply, Volunteer",
+                            icon: "💬"
+                        },
+                        {
+                            name: "Valuing",
+                            description: "Attach value and express commitment",
+                            examples: ["Show commitment to goals", "Express preferences", "Show dedication"],
+                            verbs: "Value, Appreciate, Support, Demonstrate",
+                            icon: "💎"
+                        },
+                        {
+                            name: "Organizing",
+                            description: "Integrate values into a system",
+                            examples: ["Prioritize time", "Balance perspectives", "Formulate philosophy"],
+                            verbs: "Organize, Integrate, Synthesize, Prioritize",
+                            icon: "🔗"
+                        },
+                        {
+                            name: "Characterizing",
+                            description: "Act consistently with values",
+                            examples: ["Display self-reliance", "Show integrity", "Exhibit ethical behavior"],
+                            verbs: "Act, Display, Practice, Revise",
+                            icon: "⭐"
+                        }
+                    ],
+                    videoQuiz: [
+                        {
+                            question: "What does the affective domain focus on?",
+                            options: ["Physical actions", "Thinking and problem-solving", "Feelings, values, and attitudes", "Memory and recall"],
+                            correct: 2,
+                            explanation: "The affective domain involves emotions, attitudes, and values."
+                        },
+                        {
+                            question: "Which of the following shows the highest level in the affective domain?",
+                            options: ["Receiving", "Responding", "Valuing", "Characterizing"],
+                            correct: 3,
+                            explanation: "Characterizing means consistently showing values in behavior."
+                        },
+                        {
+                            question: "When a student listens respectfully to others, it shows—",
+                            options: ["Responding", "Receiving", "Valuing", "Analyzing"],
+                            correct: 1,
+                            explanation: "Receiving involves being aware of and willing to listen to others."
+                        },
+                        {
+                            question: "A student who supports honesty in all situations shows—",
+                            options: ["Valuing", "Responding", "Characterizing", "Applying"],
+                            correct: 2,
+                            explanation: "Characterizing reflects internalizing values and acting on them."
+                        },
+                        {
+                            question: "Expressing appreciation for teamwork reflects which level?",
+                            options: ["Receiving", "Responding", "Valuing", "Creating"],
+                            correct: 2,
+                            explanation: "Valuing involves showing commitment and appreciation toward values or ideas."
+                        }
+                    ],
+                    quiz: [
+                        {
+                            question: "The first level of Affective Domain is:",
+                            options: ["Responding", "Receiving", "Valuing", "Organizing"],
+                            correct: 1,
+                            explanation: "Receiving is the first level of awareness and attention."
+                        },
+                        {
+                            question: "Which level involves active participation?",
+                            options: ["Receiving", "Responding", "Characterizing", "Valuing"],
+                            correct: 1,
+                            explanation: "Responding involves active participation."
+                        },
+                        {
+                            question: "Attaching worth to ideas is:",
+                            options: ["Organizing", "Valuing", "Responding", "Receiving"],
+                            correct: 1,
+                            explanation: "Valuing is when learners attach worth to ideas."
+                        },
+                        {
+                            question: "Acting consistently with values represents:",
+                            options: ["Valuing", "Organizing", "Characterizing", "Responding"],
+                            correct: 2,
+                            explanation: "Characterizing is the highest level of consistent action."
+                        },
+                        {
+                            question: "Integrating values occurs at which level?",
+                            options: ["Responding", "Valuing", "Organizing", "Receiving"],
+                            correct: 2,
+                            explanation: "Organizing involves integrating values into a system."
+                        }
+                    ]
+                },
+                psychomotor: {
+                    title: "Psychomotor Domain",
+                    link: "https://drive.google.com/file/d/1bUVC-5-iPgCfqenJGadl0-MvPiMMD5Wp/preview",//"https://drive.google.com/file/d/1bUVC-5-iPgCfqenJGadl0-MvPiMMD5Wp/view?usp=sharing",
+                    videoDuration: "",
+                    subtitle: "Physical Skills & Coordination",
+                    color: "bg-gradient-to-br from-emerald-500 to-teal-600",
+                    lightColor: "bg-gradient-to-br from-emerald-50 to-teal-50",
+                    borderColor: "border-emerald-500",
+                    accentColor: "text-emerald-600",
+                    description: "The psychomotor domain involves physical movement and motor skills.",
+                    developer: "Multiple frameworks exist; Simpson's (1972) and Dave's (1970) are most commonly used",
+                    emoji: "🤸",
+                    levels: [
+                        {
+                            name: "Impulse",
+                            description: "Involuntary reaction to stimulus",
+                            examples: ["React to sudden movements", "Automatic reflexes", "Instinctive responses"],
+                            verbs: "React, Respond, Reflex, Sense",
+                            icon: "⚡"
+                        },
+                        {
+                            name: "Imitation",
+                            description: "Observe and replicate behavior",
+                            examples: ["Copy a dance move", "Mimic a tennis serve", "Follow demonstration"],
+                            verbs: "Imitate, Copy, Follow, Mimic, Repeat",
+                            icon: "👁"
+                        },
+                        {
+                            name: "Manipulation",
+                            description: "Perform actions with guidance",
+                            examples: ["Practice handwriting", "Use tools with instruction", "Perform with guidance"],
+                            verbs: "Practice, Execute, Perform, Handle, Use",
+                            icon: "✋"
+                        },
+                        {
+                            name: "Coordination",
+                            description: "Integrate skills smoothly",
+                            examples: ["Combine movements in sports", "Play music fluently", "Perform sequences"],
+                            verbs: "Coordinate, Integrate, Combine, Synchronize",
+                            icon: "🎯"
+                        },
+                        {
+                            name: "Control",
+                            description: "Master skills with precision",
+                            examples: ["Perform surgery precisely", "Execute perfect form", "Demonstrate mastery"],
+                            verbs: "Master, Control, Perfect, Refine, Excel",
+                            icon: "🏆"
+                        }
+                    ],
+                    videoQuizPsychomotor: [
+                        {
+                            question: "What does the psychomotor domain focus on?",
+                            options: ["Thinking skills", "Emotional growth", "Physical skills and coordination", "Moral values"],
+                            correct: 2,
+                            explanation: "The psychomotor domain deals with physical movement and coordination."
+                        },
+                        {
+                            question: "Which of these best shows the 'Imitation' level of the psychomotor domain?",
+                            options: ["Creating a new dance move", "Watching and copying a teacher's dance steps", "Explaining how to dance", "Judging a dance performance"],
+                            correct: 1,
+                            explanation: "Imitation means copying someone’s physical actions after observing them."
+                        },
+                        {
+                            question: "When a learner performs a skill smoothly without help, it shows—",
+                            options: ["Guided Response", "Mechanism", "Adaptation", "Perception"],
+                            correct: 1,
+                            explanation: "Mechanism involves performing learned skills with confidence and control."
+                        },
+                        {
+                            question: "Adjusting movements to fit new conditions represents which level?",
+                            options: ["Adaptation", "Set", "Imitation", "Precision"],
+                            correct: 0,
+                            explanation: "Adaptation means modifying learned skills to suit new situations."
+                        },
+                        {
+                            question: "The first step in developing psychomotor skills is—",
+                            options: ["Perception", "Mechanism", "Guided Response", "Adaptation"],
+                            correct: 0,
+                            explanation: "Perception involves recognizing cues needed for motor activity."
+                        }
+                    ],
+                    quiz: [
+                        {
+                            question: "Involuntary reaction to stimulus is:",
+                            options: ["Imitation", "Impulse", "Manipulation", "Coordination"],
+                            correct: 1,
+                            explanation: "Impulse is automatic reaction without conscious thought."
+                        },
+                        {
+                            question: "Observing and replicating behavior is:",
+                            options: ["Impulse", "Imitation", "Control", "Coordination"],
+                            correct: 1,
+                            explanation: "Imitation involves copying observed behaviors."
+                        },
+                        {
+                            question: "Performing with guidance represents:",
+                            options: ["Coordination", "Manipulation", "Impulse", "Imitation"],
+                            correct: 1,
+                            explanation: "Manipulation is performing actions with guidance."
+                        },
+                        {
+                            question: "Integrating skills smoothly is:",
+                            options: ["Manipulation", "Control", "Coordination", "Imitation"],
+                            correct: 2,
+                            explanation: "Coordination involves integrating multiple skills."
+                        },
+                        {
+                            question: "Mastering with precision is:",
+                            options: ["Coordination", "Manipulation", "Control", "Imitation"],
+                            correct: 2,
+                            explanation: "Control is the highest level of mastery."
+                        }
+                    ]
+                }
+            };
+            const cumulative= {
+                    title: "Cumulative Domain",
+                    link: "https://drive.google.com/file/d/1bUVC-5-iPgCfqenJGadl0-MvPiMMD5Wp/preview",//"https://drive.google.com/file/d/1bUVC-5-iPgCfqenJGadl0-MvPiMMD5Wp/view?usp=sharing",
+                    videoDuration: "",
+                    subtitle: "Physical Skills & Coordination",
+                    color: "bg-gradient-to-br from-emerald-500 to-teal-600",
+                    lightColor: "bg-gradient-to-br from-emerald-50 to-teal-50",
+                    borderColor: "border-emerald-500",
+                    accentColor: "text-emerald-600",
+                    description: "The psychomotor domain involves physical movement and motor skills.",
+                    developer: "Multiple frameworks exist; Simpson's (1972) and Dave's (1970) are most commonly used",
+                    emoji: "🤸",
+                    levels: [
+                        {
+                            name: "Impulse",
+                            description: "Involuntary reaction to stimulus",
+                            examples: ["React to sudden movements", "Automatic reflexes", "Instinctive responses"],
+                            verbs: "React, Respond, Reflex, Sense",
+                            icon: "⚡"
+                        },
+                        {
+                            name: "Imitation",
+                            description: "Observe and replicate behavior",
+                            examples: ["Copy a dance move", "Mimic a tennis serve", "Follow demonstration"],
+                            verbs: "Imitate, Copy, Follow, Mimic, Repeat",
+                            icon: "👁"
+                        },
+                        {
+                            name: "Manipulation",
+                            description: "Perform actions with guidance",
+                            examples: ["Practice handwriting", "Use tools with instruction", "Perform with guidance"],
+                            verbs: "Practice, Execute, Perform, Handle, Use",
+                            icon: "✋"
+                        },
+                        {
+                            name: "Coordination",
+                            description: "Integrate skills smoothly",
+                            examples: ["Combine movements in sports", "Play music fluently", "Perform sequences"],
+                            verbs: "Coordinate, Integrate, Combine, Synchronize",
+                            icon: "🎯"
+                        },
+                        {
+                            name: "Control",
+                            description: "Master skills with precision",
+                            examples: ["Perform surgery precisely", "Execute perfect form", "Demonstrate mastery"],
+                            verbs: "Master, Control, Perfect, Refine, Excel",
+                            icon: "🏆"
+                        }
+                    ],
+                    videoQuizPsychomotor: [
+                        {
+                            question: "What does the psychomotor domain focus on?",
+                            options: ["Thinking skills", "Emotional growth", "Physical skills and coordination", "Moral values"],
+                            correct: 2,
+                            explanation: "The psychomotor domain deals with physical movement and coordination."
+                        },
+                        {
+                            question: "Which of these best shows the 'Imitation' level of the psychomotor domain?",
+                            options: ["Creating a new dance move", "Watching and copying a teacher's dance steps", "Explaining how to dance", "Judging a dance performance"],
+                            correct: 1,
+                            explanation: "Imitation means copying someone’s physical actions after observing them."
+                        },
+                        {
+                            question: "When a learner performs a skill smoothly without help, it shows—",
+                            options: ["Guided Response", "Mechanism", "Adaptation", "Perception"],
+                            correct: 1,
+                            explanation: "Mechanism involves performing learned skills with confidence and control."
+                        },
+                        {
+                            question: "Adjusting movements to fit new conditions represents which level?",
+                            options: ["Adaptation", "Set", "Imitation", "Precision"],
+                            correct: 0,
+                            explanation: "Adaptation means modifying learned skills to suit new situations."
+                        },
+                        {
+                            question: "The first step in developing psychomotor skills is—",
+                            options: ["Perception", "Mechanism", "Guided Response", "Adaptation"],
+                            correct: 0,
+                            explanation: "Perception involves recognizing cues needed for motor activity."
+                        }
+                    ],
+                    quiz: [
+                        {
+                            question: "Involuntary reaction to stimulus is:",
+                            options: ["Imitation", "Impulse", "Manipulation", "Coordination"],
+                            correct: 1,
+                            explanation: "Impulse is automatic reaction without conscious thought."
+                        },
+                        {
+                            question: "Observing and replicating behavior is:",
+                            options: ["Impulse", "Imitation", "Control", "Coordination"],
+                            correct: 1,
+                            explanation: "Imitation involves copying observed behaviors."
+                        },
+                        {
+                            question: "Performing with guidance represents:",
+                            options: ["Coordination", "Manipulation", "Impulse", "Imitation"],
+                            correct: 1,
+                            explanation: "Manipulation is performing actions with guidance."
+                        },
+                        {
+                            question: "Integrating skills smoothly is:",
+                            options: ["Manipulation", "Control", "Coordination", "Imitation"],
+                            correct: 2,
+                            explanation: "Coordination involves integrating multiple skills."
+                        },
+                        {
+                            question: "Mastering with precision is:",
+                            options: ["Coordination", "Manipulation", "Control", "Imitation"],
+                            correct: 2,
+                            explanation: "Control is the highest level of mastery."
+                        }
+                    ]
+                }
+
+            if (!selectedDomain) {
+                return (
+                    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 py-12 px-4">
+                        <div className="max-w-7xl mx-auto">
+                            <div className="text-center mb-16">
+                                <h1 className="text-6xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent mb-6">
+                                    Learning Domains
+                                </h1>
+                                <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                                    Explore the three fundamental domains of learning
+                                </p>
+                            </div>
+
+                            <div className="bg-white rounded-2xl shadow-xl p-10 mb-12">
+                                <h2 className="text-3xl font-bold text-gray-800 mb-4">What are Learning Domains?</h2>
+                                <p className="text-gray-700 text-lg mb-4">
+                                    Learning domains are categories used to classify different types of learning objectives.
+                                </p>
+                                <p className="text-gray-700 text-lg">
+                                    <span className="font-semibold text-purple-600">Click on any domain below</span> to explore its levels and examples.
+                                </p>
+                            </div>
+
+                            <div className="grid lg:grid-cols-3 gap-8 mb-12">
+                                {Object.entries(domains).map(([key, domain]) => (
+                                    <div
+                                        key={key}
+                                        onClick={() => setSelectedDomain(key)}
+                                        className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all cursor-pointer transform hover:-translate-y-2 hover:scale-105"
+                                    >
+                                        <div className={`domain.color h-56 flex items-center justify-center`}>
+                                            <div className="text-7xl">{domain.emoji}</div>
+                                        </div>
+                                        <div className="p-7">
+                                            <h3 className="text-2xl font-bold text-gray-800 mb-2">{domain.title}</h3>
+                                            <p className="text-gray-600 mb-5">{domain.subtitle}</p>
+                                            <button className={`domain.color text-white px-6 py-3 rounded-xl font-semibold`}>
+                                                Explore Details →
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl p-10 text-white mb-12">
+                                <h2 className="text-3xl font-bold mb-8">Why Study Learning Domains?</h2>
+                                <div className="grid md:grid-cols-3 gap-8">
+                                    <div className="bg-white/10 rounded-xl p-6">
+                                        <div className="text-4xl mb-3">👨‍🏫</div>
+                                        <h3 className="font-bold text-xl mb-3">For Educators</h3>
+                                        <p>Design comprehensive lesson plans</p>
+                                    </div>
+                                    <div className="bg-white/10 rounded-xl p-6">
+                                        <div className="text-4xl mb-3">🎓</div>
+                                        <h3 className="font-bold text-xl mb-3">For Students</h3>
+                                        <p>Understand different learning styles</p>
+                                    </div>
+                                    <div className="bg-white/10 rounded-xl p-6">
+                                        <div className="text-4xl mb-3">💼</div>
+                                        <h3 className="font-bold text-xl mb-3">For Trainers</h3>
+                                        <p>Create effective training programs</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="bg-white rounded-2xl shadow-xl p-8 mb-12">
+                                <div className="flex items-center justify-between mb-6">
+                                    <div>
+                                        <h2 className="text-3xl font-bold text-gray-800 mb-2">🎯 Cumulative Quiz</h2>
+                                        <p className="text-gray-600">Test your knowledge across all three learning domains</p>
+                                    </div>
+                                    <button
+                                        onClick={() => {
+                                            setSelectedDomain('cumulative');
+                                            setShowQuiz(true);
+                                            setCurrentQuestion(0);
+                                            setSelectedAnswers({});
+                                        }}
+                                        className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:scale-105 transition-all shadow-lg"
+                                    >
+                                        Start Cumulative Quiz →
+                                    </button>
+                                </div>
+                                <div className="grid grid-cols-3 gap-4 text-center">
+                                    <div className="p-4 bg-blue-50 rounded-lg">
+                                        <div className="text-3xl mb-2">🧠</div>
+                                        <div className="font-semibold text-gray-700">Cognitive</div>
+                                    </div>
+                                    <div className="p-4 bg-rose-50 rounded-lg">
+                                        <div className="text-3xl mb-2">❤</div>
+                                        <div className="font-semibold text-gray-700">Affective</div>
+                                    </div>
+                                    <div className="p-4 bg-emerald-50 rounded-lg">
+                                        <div className="text-3xl mb-2">🤸</div>
+                                        <div className="font-semibold text-gray-700">Psychomotor</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+
+            const domain = selectedDomain != 'cumulative'?domains[selectedDomain]:cumulative;
+            
+
+            if (showQuiz) {
+                let quizQuestions;
+                let quizDomain;
+
+                if (selectedDomain == 'cumulative') {
+                    
+                    // Create cumulative quiz with more relevant and interesting questions
+                    quizQuestions = [
+                        {
+                            question: "A teacher asks students to design a science experiment. Which domain is primarily being assessed?",
+                            options: ["Affective - showing interest", "Cognitive - creating new ideas", "Psychomotor - lab skills", "All domains equally"],
+                            correct: 1,
+                            explanation: "Creating/designing falls under the highest level of Cognitive domain (Create).",
+                            domainName: 'Cognitive',
+                            domainColor: 'text-blue-600'
+                        },
+                        {
+                            question: "A student voluntarily helps organize a charity event. This best demonstrates which domain?",
+                            options: ["Cognitive - planning", "Psychomotor - coordination", "Affective - valuing", "None of these"],
+                            correct: 2,
+                            explanation: "Voluntary participation in causes demonstrates the Affective domain (Valuing level).",
+                            domainName: 'Affective',
+                            domainColor: 'text-rose-600'
+                        },
+                        {
+                            question: "A pianist can play complex pieces automatically without thinking. This represents which level?",
+                            options: ["Impulse", "Imitation", "Manipulation", "Control"],
+                            correct: 3,
+                            explanation: "Performing automatically with mastery is the Control level of Psychomotor domain.",
+                            domainName: 'Psychomotor',
+                            domainColor: 'text-emerald-600'
+                        },
+                        {
+                            question: "Which activity involves the highest level of cognitive thinking?",
+                            options: ["Memorizing vocabulary", "Explaining a concept", "Comparing two theories", "Inventing a new solution"],
+                            correct: 3,
+                            explanation: "Inventing/creating represents the highest level (Create) in Bloom's taxonomy.",
+                            domainName: 'Cognitive',
+                            domainColor: 'text-blue-600'
+                        },
+                        {
+                            question: "A medical student begins to consistently show empathy in all patient interactions. This is which level?",
+                            options: ["Receiving", "Responding", "Organizing", "Characterizing"],
+                            correct: 3,
+                            explanation: "Consistent behavior based on internalized values is Characterizing (highest Affective level).",
+                            domainName: 'Affective',
+                            domainColor: 'text-rose-600'
+                        },
+                        {
+                            question: "When learning to ride a bike, copying the instructor's movements is which level?",
+                            options: ["Impulse", "Imitation", "Coordination", "Control"],
+                            correct: 1,
+                            explanation: "Copying/mimicking movements is the Imitation level of Psychomotor domain.",
+                            domainName: 'Psychomotor',
+                            domainColor: 'text-emerald-600'
+                        },
+                        {
+                            question: "A student critiques an article's methodology and suggests improvements. This uses which skill?",
+                            options: ["Remember", "Understand", "Analyze", "Evaluate"],
+                            correct: 3,
+                            explanation: "Critiquing and making judgments is the Evaluate level of Cognitive domain.",
+                            domainName: 'Cognitive',
+                            domainColor: 'text-blue-600'
+                        },
+                        {
+                            question: "Initially ignoring environmental issues but now actively listening to climate talks shows growth in which domain?",
+                            options: ["Cognitive understanding", "Affective receiving", "Psychomotor awareness", "All domains"],
+                            correct: 1,
+                            explanation: "Willingness to pay attention and receive information is the Receiving level (Affective).",
+                            domainName: 'Affective',
+                            domainColor: 'text-rose-600'
+                        },
+                        {
+                            question: "A surgeon modifies standard technique for a complex case. This demonstrates which level?",
+                            options: ["Manipulation", "Coordination", "Control", "All of these"],
+                            correct: 2,
+                            explanation: "Mastering skills with precision and adapting them represents Control (highest Psychomotor level).",
+                            domainName: 'Psychomotor',
+                            domainColor: 'text-emerald-600'
+                        },
+                        {
+                            question: "Which scenario best represents applying knowledge?",
+                            options: ["Reciting a formula", "Using a formula to solve real problems", "Explaining why a formula works", "Creating a new formula"],
+                            correct: 1,
+                            explanation: "Using procedures to solve problems is the Apply level of Cognitive domain.",
+                            domainName: 'Cognitive',
+                            domainColor: 'text-blue-600'
+                        },
+                        {
+                            question: "A student integrates their values about honesty, kindness, and justice into a personal philosophy. This is which level?",
+                            options: ["Valuing", "Organizing", "Characterizing", "Responding"],
+                            correct: 1,
+                            explanation: "Integrating multiple values into a coherent system is the Organizing level (Affective).",
+                            domainName: 'Affective',
+                            domainColor: 'text-rose-600'
+                        },
+                        {
+                            question: "An athlete smoothly combines running, jumping, and throwing in a decathlon. This shows which skill?",
+                            options: ["Imitation", "Manipulation", "Coordination", "Control"],
+                            correct: 2,
+                            explanation: "Integrating multiple skills smoothly is the Coordination level of Psychomotor domain.",
+                            domainName: 'Psychomotor',
+                            domainColor: 'text-emerald-600'
+                        },
+                        {
+                            question: "Breaking down a complex problem into smaller parts to understand relationships is which cognitive skill?",
+                            options: ["Application", "Analysis", "Synthesis", "Evaluation"],
+                            correct: 1,
+                            explanation: "Breaking material into parts and examining relationships is Analysis.",
+                            domainName: 'Cognitive',
+                            domainColor: 'text-blue-600'
+                        },
+                        {
+                            question: "A child jumps back when a ball rolls toward them unexpectedly. This reflex is which level?",
+                            options: ["Impulse", "Imitation", "Coordination", "Set"],
+                            correct: 0,
+                            explanation: "Involuntary, automatic reactions to stimuli are the Impulse level (Psychomotor).",
+                            domainName: 'Psychomotor',
+                            domainColor: 'text-emerald-600'
+                        },
+                        {
+                            question: "Which represents the highest integration of all three learning domains?",
+                            options: ["Memorizing facts for a test", "Participating in a debate competition", "Building a robot to help elderly people", "Reading about social issues"],
+                            correct: 2,
+                            explanation: "Building a robot for elderly involves: Cognitive (design/problem-solving), Affective (caring values), and Psychomotor (construction skills).",
+                            domainName: 'All Domains',
+                            domainColor: 'text-purple-600'
+                        }
+                    ];
+                    quizDomain = {
+                        title: 'Cumulative Quiz',
+                        color: 'bg-gradient-to-br from-purple-500 to-indigo-600',
+                        lightColor: 'bg-gradient-to-br from-purple-50 to-indigo-50',
+                        borderColor: 'border-purple-500',
+                        quiz: quizQuestions
+                    };
+                } else {
+                    
+                    quizQuestions = domain.quiz;
+                    quizDomain = domain;
+                }
+
+                const currentQ = quizQuestions[currentQuestion];
+                const calculateScore = () => {
+                    let correct = 0;
+                    quizQuestions.forEach((q, index) => {
+                        if (selectedAnswers[index] === q.correct) correct++;
+                    });
+                    return correct;
+                };
+                const score = calculateScore();
+                const percentage = Math.round((score / quizQuestions.length) * 100);
+
+                if (quizCompleted) {
+                    return (
+                        <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 py-12 px-4">
+                            <div className="max-w-4xl mx-auto">
+                                <button
+                                    onClick={() => {
+                                        setShowQuiz(false);
+                                        setQuizCompleted(false);
+                                        setSelectedAnswers({});
+                                        setSelectedDomain(null);
+                                    }}
+                                    className="mb-8 bg-white px-6 py-3 rounded-xl shadow-md font-semibold"
+                                >
+                                    ← Back to Home
+                                </button>
+
+                                <div className="bg-white rounded-2xl shadow-xl p-10 text-center">
+                                    <div className={`quizDomain.color w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6`}>
+                                        <span className="text-5xl">🏆</span>
+                                    </div>
+                                    <h3 className="text-4xl font-bold text-gray-800 mb-4">Quiz Complete!</h3>
+                                    <div className="text-6xl font-bold mb-4" style={{
+                                        color: percentage >= 80 ? '#10b981' : percentage >= 60 ? '#f59e0b' : '#ef4444'
+                                    }}>
+                                        {percentage}%
+                                    </div>
+                                    <p className="text-2xl text-gray-700 mb-8">
+                                        You got {score} out of {quizQuestions.length} correct!
+                                    </p>
+
+                                    <div className={`quizDomain.lightColor rounded-xl p-6 mb-8`}>
+                                        <h4 className="font-bold text-gray-800 mb-4">Your Results:</h4>
+                                        {quizQuestions.map((q, index) => {
+                                            const isCorrect = selectedAnswers[index] === q.correct;
+                                            return (
+                                                <div key={index} className="flex items-center gap-3 mb-3">
+                                                    <span className={isCorrect ? 'text-green-600' : 'text-red-600'}>
+                                                        {isCorrect ? '✓' : '✗'}
+                                                    </span>
+                                                    <span className="text-gray-700">Question {index + 1}</span>
+                                                    {q.domainName && (
+                                                        <span className={`text-sm font-semibold q.domainColor`}>
+                                                            ({q.domainName})
+                                                        </span>
+                                                    )}
+                                                    {!isCorrect && (
+                                                        <span className="text-sm text-gray-600">
+                                                            - Correct: {q.options[q.correct]}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+
+                                    <div className="flex gap-4 justify-center">
+                                        <button
+                                            onClick={() => {
+                                                setCurrentQuestion(0);
+                                                setSelectedAnswers({});
+                                                setQuizCompleted(false);
+                                            }}
+                                            className={`domain.color text-white px-8 py-3 rounded-xl font-semibold`}
+                                        >
+                                            Retake Quiz
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                setShowQuiz(false);
+                                                setQuizCompleted(false);
+                                                setSelectedAnswers({});
+                                                setSelectedDomain(null);
+                                            }}
+                                            className="bg-gray-200 px-8 py-3 rounded-xl font-semibold"
+                                        >
+                                            Back to Home
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    );
+                }
+
+                return (
+                    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 py-12 px-4">
+                        <div className="max-w-4xl mx-auto">
+                            <button
+                                onClick={() => setShowQuiz(false)}
+                                className="mb-8 bg-white px-6 py-3 rounded-xl shadow-md font-semibold"
+                            >
+                                ← Back {selectedDomain === 'cumulative' ? 'to Home' : 'to Domain'}
+                            </button>
+
+                            <div className="bg-white rounded-2xl shadow-xl p-8">
+                                <div className="flex justify-between mb-6">
+                                    <div>
+                                        <h3 className="text-3xl font-bold">{quizDomain.title} Quiz</h3>
+                                        {currentQ.domainName && (
+                                            <p className={`text-lg font-semibold mt-2 currentQ.domainColor`}>
+                                                Domain: {currentQ.domainName}
+                                            </p>
+                                        )}
+                                    </div>
+                                    <div className="text-gray-600 font-semibold">
+                                        Question {currentQuestion + 1} of {quizQuestions.length}
+                                    </div>
+                                </div>
+
+                                <div className="flex gap-2 mb-6">
+                                    {quizQuestions.map((_, index) => (
+                                        <div
+                                            key={index}
+                                            className={`h-2 flex-1 rounded-full ${selectedAnswers[index] !== undefined ? 'bg-gray-400' :
+                                                index === currentQuestion ? quizDomain.color.replace('bg-gradient-to-br', 'bg') : 'bg-gray-200'
+                                                }`}
+                                        />
+                                    ))}
+                                </div>
+
+                                <h4 className="text-2xl font-bold mb-6">{currentQ.question}</h4>
+
+                                <div className="space-y-3 mb-8">
+                                    {currentQ.options.map((option, index) => {
+                                        const isSelected = selectedAnswers[currentQuestion] === index;
+                                        return (
+                                            <button
+                                                key={index}
+                                                onClick={() => {
+                                                    setSelectedAnswers({ ...selectedAnswers, [currentQuestion]: index });
+                                                }}
+                                                className={`w-full p-4 rounded-xl border-2 text-left ${isSelected ? `${quizDomain.borderColor} ${quizDomain.lightColor}` :
+                                                    'border-gray-200 hover:border-gray-300'
+                                                    }`}
+                                            >
+                                                {option}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+
+                                <div className="flex justify-between">
+                                    <button
+                                        onClick={() => setCurrentQuestion(Math.max(0, currentQuestion - 1))}
+                                        disabled={currentQuestion == 0}
+                                        className="px-6 py-3 rounded-xl border-2 font-semibold disabled:opacity-50"
+                                    >
+                                        Previous
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            if (currentQuestion < quizQuestions.length - 1) {
+                                                setCurrentQuestion(currentQuestion + 1);
+                                            } else {
+                                                setQuizCompleted(true);
+                                            }
+                                        }}
+                                        //disabled={currentQuestion === 0}
+                                        className="px-6 py-3 rounded-xl border-2 font-semibold disabled:opacity-50"
+                                    >
+                                        {currentQuestion == quizQuestions.length - 1 ? `Submit Quiz` : `Next`}
+                                    </button>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+           
+            return (
+                <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 py-12 px-4">
+                    {/* ---------- Modal ---------- */}
+                    
+                    {showVideoModal && selectedDomain != 'cumulative' && (
+                        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-lg w-full text-center animate-fadeIn">
+                                <h2 className="text-2xl font-bold mb-4 text-gray-800">🎥 Watch this short video!</h2>
+                                <p className="text-gray-600 mb-6">
+                                    Learn more about the {domain.title} through this quick video explanation.
+                                </p>
+
+                               <div className="relative aspect-w-16 aspect-h-9 mb-6">
+                                    <iframe
+                                        className="w-full h-80 md:h-80 rounded-xl pointer-events-none"
+                                        src={`${domain.link}?autoplay=1&controls=0&disablekb=1&modestbranding=1&rel=0&showinfo=0&fs=0&playsinline=1`}
+                                        title="YouTube video"
+                                        frameBorder="0"
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                        allowFullScreen={false}
+                                    ></iframe>
+
+                                    {/* ✅ Transparent overlay to block all interactions, including timeline */}
+                                    <div className="absolute inset-0 z-10"></div>
+                                </div>
+
+
+                                <button
+                                    style={{ display: "none" }}
+                                    onClick={() => setShowVideoModal(false)}
+                                    className="block mt-6 mx-auto text-gray-600 hover:text-gray-900 font-semibold"
+                                >
+                                    Close
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* -------------------------- */}
+
+                    {/* 🧩 Quiz Modal — appears after video ends */}
+                    {showQuizModal && selectedDomain != 'cumulative' &&(
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 mt-8 overflow-y-auto">
+                            <div
+                                className="bg-white rounded-2xl shadow-2xl p-8 max-w-lg w-full text-center animate-fadeIn"
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                <h2 className="text-2xl font-bold mb-4 text-gray-800">🧠 Quick Check</h2>
+                                <p className="text-gray-600 mb-6">
+                                    Answer the following questions to continue.
+                                </p>
+
+                                {/* Two MCQs from domain.quiz */}
+                                {domain.videoQuiz.slice(0, 3).map((q, qIndex) => {
+                                    const userAnswer = quizAnswers[qIndex];
+                                    const isCorrect = userAnswer === q.correct;
+
+                                    return (
+                                        <div key={qIndex} className="mb-6 text-left">
+                                            <p className="font-semibold text-gray-800 mb-2">
+                                                {qIndex + 1}. {q.question}
+                                            </p>
+
+                                            {q.options.map((opt, i) => (
+                                                <label
+                                                    key={i}
+                                                    className={`block border rounded-lg px-4 py-2 mb-2 cursor-pointer 
+                                                        ${showCorrectAnswers && isCorrect && i === q.correct ? "bg-green-100 border-green-500" : ""}
+                                                        ${showCorrectAnswers && !isCorrect && i === userAnswer ? "bg-red-100 border-red-500" : ""}
+                                                    `}
+                                                >
+                                                    <input
+                                                        type="radio"
+                                                        name={`quiz-${qIndex}`}
+                                                        value={i}
+                                                        checked={userAnswer === i}
+                                                        onChange={() => {
+                                                            setQuizAnswers({ ...quizAnswers, [qIndex]: i });
+
+                                                            // ✅ After every answer update, re-check correctness
+                                                            setTimeout(() => {
+                                                                const allCorrect = domain.videoQuiz
+                                                                    .slice(0, 3)
+                                                                    .every((qq, idx) => quizAnswers[idx] === qq.correct);
+
+                                                                if (allCorrect) {
+                                                                    setShowQuizModal(false); // ✅ auto-close modal
+                                                                } else {
+                                                                    setForceRerender(prev => !prev);
+                                                                }
+                                                            }, 50);
+                                                        }}
+                                                        className="mr-2"
+                                                        disabled={showCorrectAnswers && isCorrect}  // ✅ lock only correct ones
+                                                    />
+                                                    {opt}
+                                                </label>
+                                            ))}
+
+                                            {/* ✅ Feedback after submit */}
+                                            {showCorrectAnswers && (
+                                                <div className="mt-2">
+                                                    {isCorrect ? (
+                                                        <p className="text-green-600 font-semibold">✅ Correct Answer!</p>
+                                                    ) : (
+                                                        <>
+                                                            <p className="text-red-600 font-semibold">❌ Wrong Answer</p>
+                                                            <p className="text-green-600 font-semibold">
+                                                                ✅ Correct Answer: {q.options[q.correct]}
+                                                            </p>
+                                                        </>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+
+
+
+                            <button
+                                onClick={() => {
+                                    const allAnswered = Object.keys(quizAnswers).length === 3;
+                                    if (!allAnswered) {
+                                        alert("Please answer all questions!");
+                                        return;
+                                    }
+
+                                    setShowCorrectAnswers(true);  // show feedback
+
+                                    // ✅ Check if ALL answers are correct
+                                    const allCorrect = domain.videoQuiz
+                                        .slice(0, 3)
+                                        .every((q, idx) => quizAnswers[idx] === q.correct);
+
+                                    if (allCorrect) {
+                                        // ✅ Close modal immediately
+                                        setShowQuizModal(false);
+                                    }
+                                }}
+
+                                className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-8 py-3 rounded-xl font-semibold hover:scale-105 transition-transform"
+                            >
+                                Submit
+                            </button>
+
+
+
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="max-w-7xl mx-auto">
+                        <button
+                            onClick={() => {
+                                setSelectedDomain(null);
+                                setExpandedLevel(null);
+                            }}
+                            className="mb-8 bg-white px-6 py-3 rounded-xl shadow-md font-semibold"
+                        >
+                            ← Back to All Domains
+                        </button>
+
+                        <div className={`${domain.color} rounded-2xl p-10 mb-8 shadow-2xl`}>
+                            <div className="flex items-center gap-6">
+                                <div className="text-6xl">{domain.emoji}</div>
+                                <div className="text-white">
+                                    <h2 className="text-5xl font-bold mb-2">{domain.title}</h2>
+                                    <p className="text-2xl opacity-90">{domain.subtitle}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="bg-white rounded-2xl shadow-xl p-8 mb-8">
+                            <h3 className="text-3xl font-bold text-gray-800 mb-4">Overview</h3>
+                            <p className="text-gray-700 text-lg mb-4">{domain.description}</p>
+                            <div className={`${domain.lightColor} p-4 rounded-xl`}>
+                                <p className="text-gray-700 italic">{domain.developer}</p>
+                            </div>
+                        </div>
+
+                        <div className="bg-white rounded-2xl shadow-xl p-8 mb-8">
+                            <h3 className="text-3xl font-bold text-gray-800 mb-6">Hierarchy of Levels</h3>
+                            <p className="text-gray-600 mb-6">Click on each level to explore details</p>
+                            <div className="space-y-4">
+                                {domain.levels.map((level, index) => (
+                                    <div
+                                        key={index}
+                                        className={`border-2 rounded-xl ${expandedLevel === index ? domain.borderColor : 'border-gray-200'
+                                            }`}
+                                    >
+                                        <button
+                                            onClick={() =>
+                                                setExpandedLevel(expandedLevel === index ? null : index)
+                                            }
+                                            className={`w-full p-5 text-left flex items-center justify-between ${expandedLevel === index ? domain.lightColor : 'bg-gray-50'
+                                                }`}
+                                        >
+                                            <div className="flex items-center gap-4">
+                                                <div
+                                                    className={`${domain.color} text-white w-12 h-12 rounded-xl flex items-center justify-center font-bold`}
+                                                >
+                                                    {index + 1}
+                                                </div>
+                                                <div className="text-3xl mr-2">{level.icon}</div>
+                                                <div>
+                                                    <span className="text-xl font-bold block">{level.name}</span>
+                                                    <span className="text-sm text-gray-600">
+                                                        {level.description}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <span className={expandedLevel === index ? 'rotate-90' : ''}>→</span>
+                                        </button>
+                                        {expandedLevel === index && (
+                                            <div className="p-6 bg-white border-t-2">
+                                                <h4 className="font-bold mb-3">Examples:</h4>
+                                                <ul className="space-y-2 mb-6">
+                                                    {level.examples.map((example, i) => (
+                                                        <li key={i} className="flex gap-3">
+                                                            <span
+                                                                className={`${domain.color} text-white rounded-full w-6 h-6 flex items-center justify-center text-sm`}
+                                                            >
+                                                                {i + 1}
+                                                            </span>
+                                                            <span>{example}</span>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                                <div className={`${domain.lightColor} p-5 rounded-xl`}>
+                                                    <h4 className="font-bold mb-2">Action Verbs:</h4>
+                                                    <p className={`${domain.accentColor} font-semibold`}>
+                                                        {level.verbs}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className={`${domain.color} rounded-2xl shadow-xl p-8 text-white`}>
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <h3 className="text-3xl font-bold mb-3">Test Your Knowledge!</h3>
+                                    <p className="text-lg">Take a quiz to reinforce your learning</p>
+                                </div>
+                                <button
+                                    onClick={() => {
+                                        setShowQuiz(true);
+                                        setCurrentQuestion(0);
+                                        setSelectedAnswers({});
+                                    }}
+                                    className="bg-white text-gray-800 px-8 py-4 rounded-xl font-bold text-lg"
+                                >
+                                    Start Quiz →
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+
+        }
+
+        ReactDOM.render(<LearningDomainsApp />, document.getElementById('root'));
+    </script>
+</body>
+
+</html>
